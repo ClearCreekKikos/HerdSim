@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://b23w4e5r8k3p"]
+[gd_scene load_steps=6 format=3 uid="uid://b23w4e5r8k3p"]
 
 [ext_resource type="Script" path="res://scripts/DashboardUI.gd" id="1_dshbd"]
 [ext_resource type="Script" path="res://scripts/BreedingUI.gd" id="2_brdng"]
 [ext_resource type="Script" path="res://scripts/MarketUI.gd" id="3_mrkt"]
 [ext_resource type="PackedScene" path="res://scenes/AuctionDialog.tscn" id="4_actn"]
+[ext_resource type="PackedScene" path="res://scenes/Pasture3D.tscn" id="5_pstr3"]
 
 [node name="MainUI" type="TabContainer"]
 anchors_preset = 15
@@ -113,6 +114,17 @@ layout_mode = 2
 
 [node name="TreatBtn" type="Button" parent="Dashboard/DetailsModal/VBox/DetailsActions"]
 layout_mode = 2
+
+[node name="Pastures" type="SubViewportContainer" parent="."]
+layout_mode = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="Pastures"]
+handle_input_locally = false
+size = Vector2i(540, 960)
+render_target_update_mode = 4
+
+[node name="Pasture3D" parent="Pastures/SubViewport" instance=ExtResource("5_pstr3")]
 
 [node name="Breeding" type="Control" parent="."]
 layout_mode = 2

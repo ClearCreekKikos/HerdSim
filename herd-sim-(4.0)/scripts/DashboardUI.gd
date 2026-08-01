@@ -64,13 +64,13 @@ func _update_upgrades():
 
 	# Spawn chips dynamically
 	if GameManager.has_guard_donkey:
-		_add_upgrade_label("Guard Donkey 🫏", Color.AMBER)
+		_add_upgrade_label("Guard Donkey 🫏", Color("ffc107"))
 	if GameManager.has_medical_station:
-		_add_upgrade_label("Medical Clinic 💊", Color.TOMATO)
+		_add_upgrade_label("Medical Clinic 💊", Color("ff6347"))
 	if GameManager.has_automated_waterers:
-		_add_upgrade_label("Auto Irrigation 💧", Color.DODGER_BLUE)
+		_add_upgrade_label("Auto Irrigation 💧", Color("1e90ff"))
 	if GameManager.has_quarantine_pen:
-		_add_upgrade_label("Quarantine Pen 🚧", Color.ORANGE)
+		_add_upgrade_label("Quarantine Pen 🚧", Color("ff9800"))
 
 func _add_upgrade_label(text: String, color: Color):
 	var lbl = Label.new()
@@ -96,26 +96,33 @@ func _update_herd_list():
 		var item = HBoxContainer.new()
 		var name_lbl = Label.new()
 		name_lbl.text = " %s [%s] - %s " % [goat.name, goat.breed, goat.get_gender_display()]
-		name_lbl.size_flags_horizontal = SIZE_EXPAND_FILL
+		name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		item.add_child(name_lbl)
 		
 		# Tap detector on listing row
 		var btn = Button.new()
 		btn.text = "Details / Pedigree"
-		btn.pressed.connect(func(): _show_goat_details(goat))
+		btn.pressed.connect(func():
+			_show_goat_details(goat)
+		)
 		item.add_child(btn)
 
 		var action_btn = Button.new()
 		if goat.is_sick:
 			var cost = 10.0 if GameManager.has_medical_station else 25.0
 			action_btn.text = "Treat ($%0.0f)" % cost
-			action_btn.pressed.connect(func(): GameManager.treat_goat(goat.id))
-			action_btn.add_theme_color_override("font_color", Color.RED)
+			action_btn.pressed.connect(func():
+				GameManager.treat_goat(goat.id)
+			)
+			action_btn.add_theme_color_override("font_color", Color("f44336"))
 		else:
 			action_btn.text = "Auction"
-			action_btn.pressed.connect(func(): _start_auction_process(goat))
-			action_btn.add_theme_color_override("font_color", Color.GREEN)
+			action_btn.pressed.connect(func():
+				_start_auction_process(goat)
+			)
+			action_btn.add_theme_color_override("font_color", Color("4caf50"))
 		item.add_child(action_btn)
+
 
 		herd_container.add_child(item)
 

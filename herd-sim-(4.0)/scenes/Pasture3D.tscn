@@ -9,6 +9,15 @@ script = ExtResource("1_a2b3c")
 goat_scene = ExtResource("2_g3d2b")
 donkey_scene = ExtResource("3_d3d2c")
 
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.707107, -0.353553, 0.612372, 0, 0.866025, 0.5, -0.707107, -0.353553, 0.612372, 45, 35, 45)
+projection = 1
+size = 75.0
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 20, 0)
+shadow_enabled = true
+
 [node name="GroundP1" type="MeshInstance3D" parent="."]
 
 [node name="GroundP2" type="MeshInstance3D" parent="."]
