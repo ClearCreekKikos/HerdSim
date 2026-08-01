@@ -60,7 +60,7 @@ func duplicate_goat() -> Goat:
 	copy.dam_pr = dam_pr
 	return copy
 
-static func newborn(p_id: String, p_name: String, p_gender: String, sire: Goat, dam: Goat) -> Goat:
+static func newborn(p_id: String, p_name: String, p_gender: String, sire, dam):
 	# Average genetics with +/- 10% mutation
 	var base_pr = (sire.parasite_resistance + dam.parasite_resistance) / 2.0
 	var mutation_pr = (randf() * 0.2) - 0.1

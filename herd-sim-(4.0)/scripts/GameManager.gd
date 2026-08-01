@@ -11,8 +11,8 @@ var weather: String = "Sunny"
 var current_pasture: int = 1
 var grass_level_1: float = 80.0
 var grass_level_2: float = 100.0
-var ledger: Array[String] = []
-var herd: Array[Goat] = []
+var ledger: Array = []
+var herd: Array = []
 var has_guard_donkey: bool = false
 
 # Upgrades
@@ -119,8 +119,8 @@ func next_day():
 			infect_target_index = healthy_indices[randi() % healthy_indices.size()]
 
 	# 5. Update Goats
-	var updated_herd: Array[Goat] = []
-	var newborn_kids: Array[Goat] = []
+	var updated_herd: Array = []
+	var newborn_kids: Array = []
 
 	for i in range(herd.size()):
 		var goat = herd[i]

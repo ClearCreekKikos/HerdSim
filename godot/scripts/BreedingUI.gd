@@ -5,8 +5,8 @@ extends Control
 @onready var comparison_stats = $ComparisonStats
 @onready var breed_button = $BreedButton
 
-var bucks: Array[Goat] = []
-var does: Array[Goat] = []
+var bucks: Array = []
+var does: Array = []
 
 func _ready():
 	GameManager.state_changed.connect(_on_state_changed)

@@ -14,16 +14,16 @@ var current_bid: float = 0.0
 var current_bidder: String = "No bids yet"
 var is_bidding_active: bool = true
 var bid_count: int = 0
-var bid_history: Array[String] = []
+var bid_history: Array = []
 
 class BidderProfile:
 	var name: String
 	var base_value: float
 	var max_multiplier: float
 	var preference_bonus: float
-	var dialogues: Array[String]
+	var dialogues: Array
 
-	func _init(p_name: String, p_base: float, p_max: float, p_bonus: float, p_dial: Array[String]):
+	func _init(p_name: String, p_base: float, p_max: float, p_bonus: float, p_dial: Array):
 		name = p_name
 		base_value = p_base
 		max_multiplier = p_max
@@ -33,7 +33,7 @@ class BidderProfile:
 	func get_max_bid() -> float:
 		return (base_value * max_multiplier) + preference_bonus
 
-var bidders: Array[BidderProfile] = []
+var bidders: Array = []
 
 func setup(p_goat: Goat):
 	goat = p_goat

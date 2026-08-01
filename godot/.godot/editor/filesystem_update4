@@ -1,1 +1,2 @@
-res://scenes/Pasture3D.tscn
+res://scripts/GameManager.gd
+res://scripts/Goat.gd
