@@ -2,6 +2,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/game_provider.dart';
+import '../models/goat_model.dart';
+import 'ranch_3d_painter.dart';
 
 class PastureScreen extends ConsumerStatefulWidget {
   const PastureScreen({super.key});
@@ -12,13 +14,9 @@ class PastureScreen extends ConsumerStatefulWidget {
 
 class _PastureScreenState extends ConsumerState<PastureScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  final List<_GoatSprite> _sprites = [];
-  _GoatSprite? _donkeySprite;
+  final List<AnimatedGoatSprite> _sprites = [];
+  AnimatedDonkeySprite? _donkeySprite;
   final _random = Random();
-  
-  // Dimensions of the pasture canvas bounds
-  final double _pastureWidth = 350.0;
-  final double _pastureHeight = 250.0;
 
   @override
   void initState() {
@@ -37,47 +35,65 @@ class _PastureScreenState extends ConsumerState<PastureScreen> with SingleTicker
     super.dispose();
   }
 
-  void _syncSpritesWithHerd(int herdSize, bool hasDonkey) {
-    // If list sizes don't match, rebuild/adjust sprites list
-    if (_sprites.length != herdSize) {
-      if (_sprites.length < herdSize) {
-        // Add new sprites
-        final count = herdSize - _sprites.length;
-        for (int i = 0; i < count; i++) {
-          _sprites.add(_GoatSprite(
-            x: _random.nextDouble() * (_pastureWidth - 40) + 20,
-            y: _random.nextDouble() * (_pastureHeight - 40) + 20,
-            targetX: _random.nextDouble() * (_pastureWidth - 40) + 20,
-            targetY: _random.nextDouble() * (_pastureHeight - 40) + 20,
-            emoji: '🐐',
-          ));
-        }
+  void _syncSpritesWithHerd(List<Goat> herd, bool hasDonkey, int currentPasture) {
+    // 1. Remove sprites that are no longer in the herd
+    final herdIds = herd.map((g) => g.id).toSet();
+    _sprites.removeWhere((sprite) => !herdIds.contains(sprite.id));
+
+    // 2. Add or update sprites
+    for (var goat in herd) {
+      final index = _sprites.indexWhere((s) => s.id == goat.id);
+      if (index != -1) {
+        _sprites[index].goat = goat;
+        _sprites[index].forcePastureCheck(_random, currentPasture);
       } else {
-        // Remove excess sprites
-        _sprites.removeRange(herdSize, _sprites.length);
+        // Create new sprite in the active pasture
+        double startX, startY;
+        if (currentPasture == 1) {
+          startX = -60 + _random.nextDouble() * 50;
+        } else {
+          startX = 10 + _random.nextDouble() * 50;
+        }
+        startY = -60 + _random.nextDouble() * 120;
+
+        final newSprite = AnimatedGoatSprite(
+          id: goat.id,
+          goat: goat,
+          x: startX,
+          y: startY,
+          targetX: startX,
+          targetY: startY,
+        );
+        newSprite._setNewTarget(_random, currentPasture);
+        _sprites.add(newSprite);
       }
     }
 
-    // Handle Guard Donkey sprite
+    // 3. Donkey sprite sync
     if (hasDonkey && _donkeySprite == null) {
-      _donkeySprite = _GoatSprite(
-        x: _random.nextDouble() * (_pastureWidth - 40) + 20,
-        y: _random.nextDouble() * (_pastureHeight - 40) + 20,
-        targetX: _random.nextDouble() * (_pastureWidth - 40) + 20,
-        targetY: _random.nextDouble() * (_pastureHeight - 40) + 20,
-        emoji: '🫏',
+      double startX = currentPasture == 1 ? -30 : 30;
+      _donkeySprite = AnimatedDonkeySprite(
+        x: startX,
+        y: 0,
+        targetX: startX,
+        targetY: 0,
       );
+      _donkeySprite!._setNewTarget(_random, currentPasture);
+    } else if (hasDonkey && _donkeySprite != null) {
+      _donkeySprite!.forcePastureCheck(_random, currentPasture);
     } else if (!hasDonkey) {
       _donkeySprite = null;
     }
   }
 
   void _updateSpritePositions() {
+    if (!mounted) return;
+    final gameState = ref.read(gameStateProvider);
     setState(() {
       for (var sprite in _sprites) {
-        sprite.updatePosition(_pastureWidth, _pastureHeight, _random);
+        sprite.updatePosition(_random, gameState.ranch.currentPasture);
       }
-      _donkeySprite?.updatePosition(_pastureWidth, _pastureHeight, _random);
+      _donkeySprite?.updatePosition(_random, gameState.ranch.currentPasture);
     });
   }
 
@@ -86,20 +102,12 @@ class _PastureScreenState extends ConsumerState<PastureScreen> with SingleTicker
     final gameState = ref.watch(gameStateProvider);
     final ranch = gameState.ranch;
     final herd = gameState.herd;
-    
     final theme = Theme.of(context);
 
-    _syncSpritesWithHerd(herd.length, gameState.hasGuardDonkey);
+    // Keep sprites in sync
+    _syncSpritesWithHerd(herd, gameState.hasGuardDonkey, ranch.currentPasture);
 
-    final currentPastureGrass = ranch.currentPasture == 1 ? ranch.grassLevel1 : ranch.grassLevel2;
-
-    // Grass Color shifting based on grass level
-    Color getGrassColor(double grassLevel) {
-      if (grassLevel > 70) return Colors.green.shade700;
-      if (grassLevel > 40) return Colors.green.shade500;
-      if (grassLevel > 15) return Colors.green.shade300;
-      return Colors.brown.shade300; // Brown pasture if grass is low
-    }
+    final double currentPastureGrass = ranch.currentPasture == 1 ? ranch.grassLevel1 : ranch.grassLevel2;
 
     return Scaffold(
       appBar: AppBar(
@@ -145,102 +153,24 @@ class _PastureScreenState extends ConsumerState<PastureScreen> with SingleTicker
               ),
               const SizedBox(height: 16),
 
-              // Visual 2D Simulated Field Canvas
+              // Visual 3D Simulated Field Canvas
               Center(
-                child: Container(
-                  width: _pastureWidth,
-                  height: _pastureHeight,
-                  decoration: BoxDecoration(
-                    color: getGrassColor(currentPastureGrass),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.brown.shade800, width: 6), // Wooden Fence Border
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.15),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    width: 360,
+                    height: 280,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.brown.shade800, width: 6), // Wooden Fence Border
+                    ),
+                    child: CustomPaint(
+                      painter: Ranch3DPainter(
+                        gameState: gameState,
+                        goatSprites: _sprites,
+                        donkeySprite: _donkeySprite,
                       ),
-                    ],
-                  ),
-                  child: Stack(
-                    children: [
-                      // Draw animated sprites (goats)
-                      for (int i = 0; i < _sprites.length; i++)
-                        Positioned(
-                          left: _sprites[i].x,
-                          top: _sprites[i].y,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Label with goat name in small text
-                              if (i < herd.length)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withValues(alpha: 0.5),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    herd[i].name,
-                                    style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w500),
-                                  ),
-                                ),
-                              Text(
-                                herd[i].isSick ? '🤒' : (herd[i].isPregnant ? '🤰' : '🐐'),
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                      // Draw Guard Donkey
-                      if (_donkeySprite != null)
-                        Positioned(
-                          left: _donkeySprite!.x,
-                          top: _donkeySprite!.y,
-                          child: const Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '🫏 Guard',
-                                style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold, backgroundColor: Colors.teal),
-                              ),
-                              Text(
-                                '🫏',
-                                style: TextStyle(fontSize: 24),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                      // Draw Automated Waterer Visual Feedback
-                      if (ranch.hasAutomatedWaterers)
-                        Positioned(
-                          right: 12,
-                          top: 12,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: Colors.blueAccent.withValues(alpha: 0.85),
-                              borderRadius: BorderRadius.circular(4),
-                              boxShadow: const [
-                                BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))
-                              ],
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.water_drop, color: Colors.white, size: 10),
-                                SizedBox(width: 3),
-                                Text(
-                                  'Irrigation Active 💧',
-                                  style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                    ],
+                      size: const Size(360, 280),
+                    ),
                   ),
                 ),
               ),
@@ -255,7 +185,7 @@ class _PastureScreenState extends ConsumerState<PastureScreen> with SingleTicker
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'Pasture Legend & Actions',
+                        'Pasture Legend & Info',
                         style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 12),
@@ -270,8 +200,8 @@ class _PastureScreenState extends ConsumerState<PastureScreen> with SingleTicker
                       ),
                       const Divider(height: 24),
                       Text(
-                        'Keeping your pasture rotation active is key. Grazed grass depletes by ${herd.length * 2} points daily. '
-                        'Resting pastures recover by 2-6 points daily depending on rain.',
+                        'Pastures recover and support grazing dynamically. Upgrades like Automated Waterers speed up grass growth. '
+                        'Rotate your herd regularly to prevent starvation!',
                         style: const TextStyle(color: Colors.grey, fontSize: 12),
                       ),
                     ],
@@ -286,25 +216,25 @@ class _PastureScreenState extends ConsumerState<PastureScreen> with SingleTicker
   }
 }
 
-class _GoatSprite {
+class AnimatedGoatSprite {
+  final String id;
+  Goat goat;
   double x;
   double y;
   double targetX;
   double targetY;
-  String emoji;
 
-  _GoatSprite({
+  AnimatedGoatSprite({
+    required this.id,
+    required this.goat,
     required this.x,
     required this.y,
     required this.targetX,
     required this.targetY,
-    required this.emoji,
   });
 
-  void updatePosition(double boundsWidth, double boundsHeight, Random random) {
-    // Speed towards target
-    const double speed = 0.5;
-    
+  void updatePosition(Random random, int currentPasture) {
+    const double speed = 0.4;
     final double dx = targetX - x;
     final double dy = targetY - y;
     final double distance = sqrt(dx * dx + dy * dy);
@@ -313,9 +243,79 @@ class _GoatSprite {
       x += (dx / distance) * speed;
       y += (dy / distance) * speed;
     } else {
-      // Reached target, set a new random target in bounds
-      targetX = random.nextDouble() * (boundsWidth - 45) + 15;
-      targetY = random.nextDouble() * (boundsHeight - 45) + 15;
+      _setNewTarget(random, currentPasture);
+    }
+  }
+
+  void _setNewTarget(Random random, int currentPasture) {
+    if (currentPasture == 1) {
+      targetX = -60 + random.nextDouble() * 50; // Pasture 1 boundary X: [-60, -10]
+    } else {
+      targetX = 10 + random.nextDouble() * 50;  // Pasture 2 boundary X: [10, 60]
+    }
+    targetY = -60 + random.nextDouble() * 120;  // Boundary Y: [-60, 60]
+  }
+
+  void forcePastureCheck(Random random, int currentPasture) {
+    bool isOutside = false;
+    if (currentPasture == 1 && x > 0) {
+      isOutside = true;
+    } else if (currentPasture == 2 && x < 0) {
+      isOutside = true;
+    }
+    
+    if (isOutside) {
+      _setNewTarget(random, currentPasture);
+    }
+  }
+}
+
+class AnimatedDonkeySprite {
+  double x;
+  double y;
+  double targetX;
+  double targetY;
+
+  AnimatedDonkeySprite({
+    required this.x,
+    required this.y,
+    required this.targetX,
+    required this.targetY,
+  });
+
+  void updatePosition(Random random, int currentPasture) {
+    const double speed = 0.3;
+    final double dx = targetX - x;
+    final double dy = targetY - y;
+    final double distance = sqrt(dx * dx + dy * dy);
+
+    if (distance > speed) {
+      x += (dx / distance) * speed;
+      y += (dy / distance) * speed;
+    } else {
+      _setNewTarget(random, currentPasture);
+    }
+  }
+
+  void _setNewTarget(Random random, int currentPasture) {
+    if (currentPasture == 1) {
+      targetX = -50 + random.nextDouble() * 40;
+    } else {
+      targetX = 10 + random.nextDouble() * 40;
+    }
+    targetY = -50 + random.nextDouble() * 100;
+  }
+
+  void forcePastureCheck(Random random, int currentPasture) {
+    bool isOutside = false;
+    if (currentPasture == 1 && x > 0) {
+      isOutside = true;
+    } else if (currentPasture == 2 && x < 0) {
+      isOutside = true;
+    }
+    
+    if (isOutside) {
+      _setNewTarget(random, currentPasture);
     }
   }
 }

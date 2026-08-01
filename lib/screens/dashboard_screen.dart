@@ -1,19 +1,113 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/game_provider.dart';
 import '../models/goat_model.dart';
 import 'auction_dialog.dart';
+import 'ranch_3d_painter.dart';
+import 'pasture_screen.dart'; // Imports sprite classes
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  final List<AnimatedGoatSprite> _sprites = [];
+  AnimatedDonkeySprite? _donkeySprite;
+  final _random = Random();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 10),
+    )..repeat();
+    _controller.addListener(_updateSpritePositions);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _syncSpritesWithHerd(List<Goat> herd, bool hasDonkey, int currentPasture) {
+    // 1. Remove sprites that are no longer in the herd
+    final herdIds = herd.map((g) => g.id).toSet();
+    _sprites.removeWhere((sprite) => !herdIds.contains(sprite.id));
+
+    // 2. Add or update sprites
+    for (var goat in herd) {
+      final index = _sprites.indexWhere((s) => s.id == goat.id);
+      if (index != -1) {
+        _sprites[index].goat = goat;
+        _sprites[index].forcePastureCheck(_random, currentPasture);
+      } else {
+        // Create new sprite in active pasture
+        double startX, startY;
+        if (currentPasture == 1) {
+          startX = -60 + _random.nextDouble() * 50;
+        } else {
+          startX = 10 + _random.nextDouble() * 50;
+        }
+        startY = -60 + _random.nextDouble() * 120;
+
+        final newSprite = AnimatedGoatSprite(
+          id: goat.id,
+          goat: goat,
+          x: startX,
+          y: startY,
+          targetX: startX,
+          targetY: startY,
+        );
+        newSprite.forcePastureCheck(_random, currentPasture);
+        _sprites.add(newSprite);
+      }
+    }
+
+    // 3. Donkey sprite sync
+    if (hasDonkey && _donkeySprite == null) {
+      double startX = currentPasture == 1 ? -30 : 30;
+      _donkeySprite = AnimatedDonkeySprite(
+        x: startX,
+        y: 0,
+        targetX: startX,
+        targetY: 0,
+      );
+      _donkeySprite!.forcePastureCheck(_random, currentPasture);
+    } else if (hasDonkey && _donkeySprite != null) {
+      _donkeySprite!.forcePastureCheck(_random, currentPasture);
+    } else if (!hasDonkey) {
+      _donkeySprite = null;
+    }
+  }
+
+  void _updateSpritePositions() {
+    if (!mounted) return;
+    final gameState = ref.read(gameStateProvider);
+    setState(() {
+      for (var sprite in _sprites) {
+        sprite.updatePosition(_random, gameState.ranch.currentPasture);
+      }
+      _donkeySprite?.updatePosition(_random, gameState.ranch.currentPasture);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final gameState = ref.watch(gameStateProvider);
     final ranch = gameState.ranch;
     final herd = gameState.herd;
     
     final theme = Theme.of(context);
+
+    // Sync sprites
+    _syncSpritesWithHerd(herd, gameState.hasGuardDonkey, ranch.currentPasture);
 
     // Weather Icon helper
     IconData getWeatherIcon(String weather) {
@@ -54,6 +148,26 @@ class DashboardScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // 0. Visual 3D Ranch Viewport Header
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  height: 180,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.brown.shade800, width: 4), // Wooden Fence Border
+                  ),
+                  child: CustomPaint(
+                    painter: Ranch3DPainter(
+                      gameState: gameState,
+                      goatSprites: _sprites,
+                      donkeySprite: _donkeySprite,
+                    ),
+                    size: const Size(double.infinity, 180),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
               // 1. Core Tycoon Stats Bar
               Row(
                 children: [
@@ -352,14 +466,9 @@ class DashboardScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(title, style: TextStyle(fontWeight: isActive ? FontWeight.bold : FontWeight.normal)),
-              if (isActive) const Text('GRAZING', style: TextStyle(fontSize: 9, color: Colors.teal, fontWeight: FontWeight.bold)),
+              if (isActive)
+                const Icon(Icons.check_circle, size: 16, color: Colors.teal),
             ],
-          ),
-          const SizedBox(height: 8),
-          LinearProgressIndicator(
-            value: level / 100.0,
-            backgroundColor: Colors.grey.shade200,
-            valueColor: AlwaysStoppedAnimation<Color>(level > 40 ? Colors.green : Colors.brown),
           ),
           const SizedBox(height: 4),
           Text('${level.toStringAsFixed(0)}% Grass', style: theme.textTheme.bodySmall),
