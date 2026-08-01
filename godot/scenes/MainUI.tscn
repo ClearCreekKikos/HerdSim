@@ -1,180 +1,188 @@
-[gd_scene load_steps=6 format=3 uid="uid://b23w4e5r8k3p"]
+[gd_scene format=3 uid="uid://b23w4e5r8k3p"]
 
-[ext_resource type="Script" path="res://scripts/DashboardUI.gd" id="1_dshbd"]
-[ext_resource type="Script" path="res://scripts/BreedingUI.gd" id="2_brdng"]
-[ext_resource type="Script" path="res://scripts/MarketUI.gd" id="3_mrkt"]
-[ext_resource type="PackedScene" path="res://scenes/AuctionDialog.tscn" id="4_actn"]
-[ext_resource type="PackedScene" path="res://scenes/Pasture3D.tscn" id="5_pstr3"]
+[ext_resource type="Script" uid="uid://cykf0b2s6nx5b" path="res://scripts/DashboardUI.gd" id="1_dshbd"]
+[ext_resource type="Script" uid="uid://bsrsf7188s3ky" path="res://scripts/BreedingUI.gd" id="2_brdng"]
+[ext_resource type="Script" uid="uid://cia3fyadkbxo1" path="res://scripts/MarketUI.gd" id="3_mrkt"]
+[ext_resource type="PackedScene" uid="uid://df5w3e2r8k3r" path="res://scenes/AuctionDialog.tscn" id="4_actn"]
+[ext_resource type="PackedScene" uid="uid://cfy5b8w3e0g2k" path="res://scenes/Pasture3D.tscn" id="5_pstr3"]
 
-[node name="MainUI" type="TabContainer"]
+[node name="MainUI" type="TabContainer" unique_id=2065287149]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+current_tab = 0
 
-[node name="Dashboard" type="Control" parent="."]
+[node name="Dashboard" type="Control" parent="." unique_id=561508860]
 layout_mode = 2
 script = ExtResource("1_dshbd")
 auction_dialog_scene = ExtResource("4_actn")
+metadata/_tab_index = 0
 
-[node name="StatsBar" type="VBoxContainer" parent="Dashboard"]
+[node name="StatsBar" type="VBoxContainer" parent="Dashboard" unique_id=186772145]
 layout_mode = 0
 
-[node name="CashLabel" type="Label" parent="Dashboard/StatsBar"]
+[node name="CashLabel" type="Label" parent="Dashboard/StatsBar" unique_id=681096425]
 layout_mode = 2
 
-[node name="FeedLabel" type="Label" parent="Dashboard/StatsBar"]
+[node name="FeedLabel" type="Label" parent="Dashboard/StatsBar" unique_id=1820829600]
 layout_mode = 2
 
-[node name="WeatherLabel" type="Label" parent="Dashboard/StatsBar"]
+[node name="WeatherLabel" type="Label" parent="Dashboard/StatsBar" unique_id=2103187012]
 layout_mode = 2
 
-[node name="DayLabel" type="Label" parent="Dashboard/StatsBar"]
+[node name="DayLabel" type="Label" parent="Dashboard/StatsBar" unique_id=478946380]
 layout_mode = 2
 
-[node name="PasturePanel" type="VBoxContainer" parent="Dashboard"]
+[node name="PasturePanel" type="VBoxContainer" parent="Dashboard" unique_id=823304831]
 layout_mode = 0
 
-[node name="P1Label" type="Label" parent="Dashboard/PasturePanel"]
+[node name="P1Label" type="Label" parent="Dashboard/PasturePanel" unique_id=527424630]
 layout_mode = 2
 
-[node name="P1Active" type="TextureRect" parent="Dashboard/PasturePanel"]
+[node name="P1Active" type="TextureRect" parent="Dashboard/PasturePanel" unique_id=395132949]
 layout_mode = 2
 
-[node name="P2Label" type="Label" parent="Dashboard/PasturePanel"]
+[node name="P2Label" type="Label" parent="Dashboard/PasturePanel" unique_id=246946758]
 layout_mode = 2
 
-[node name="P2Active" type="TextureRect" parent="Dashboard/PasturePanel"]
+[node name="P2Active" type="TextureRect" parent="Dashboard/PasturePanel" unique_id=1087482107]
 layout_mode = 2
 
-[node name="UpgradesPanel" type="Panel" parent="Dashboard"]
+[node name="UpgradesPanel" type="Panel" parent="Dashboard" unique_id=1425086340]
 layout_mode = 0
 
-[node name="UpgradesWrap" type="HFlowContainer" parent="Dashboard/UpgradesPanel"]
+[node name="UpgradesWrap" type="HFlowContainer" parent="Dashboard/UpgradesPanel" unique_id=37165576]
 layout_mode = 0
 
-[node name="HerdPanel" type="VBoxContainer" parent="Dashboard"]
+[node name="HerdPanel" type="VBoxContainer" parent="Dashboard" unique_id=327998777]
 layout_mode = 0
 
-[node name="HerdTitle" type="Label" parent="Dashboard/HerdPanel"]
+[node name="HerdTitle" type="Label" parent="Dashboard/HerdPanel" unique_id=1705032915]
 layout_mode = 2
 
-[node name="HerdScroll" type="ScrollContainer" parent="Dashboard/HerdPanel"]
+[node name="HerdScroll" type="ScrollContainer" parent="Dashboard/HerdPanel" unique_id=436486841]
 layout_mode = 2
 
-[node name="HerdList" type="VBoxContainer" parent="Dashboard/HerdPanel/HerdScroll"]
+[node name="HerdList" type="VBoxContainer" parent="Dashboard/HerdPanel/HerdScroll" unique_id=1278788022]
 layout_mode = 2
 
-[node name="LedgerPanel" type="VBoxContainer" parent="Dashboard"]
+[node name="LedgerPanel" type="VBoxContainer" parent="Dashboard" unique_id=369607227]
 layout_mode = 0
 
-[node name="LedgerScroll" type="ScrollContainer" parent="Dashboard/LedgerPanel"]
+[node name="LedgerScroll" type="ScrollContainer" parent="Dashboard/LedgerPanel" unique_id=412503425]
 layout_mode = 2
 
-[node name="LedgerLog" type="Label" parent="Dashboard/LedgerPanel/LedgerScroll"]
+[node name="LedgerLog" type="Label" parent="Dashboard/LedgerPanel/LedgerScroll" unique_id=1510824326]
 layout_mode = 2
 
-[node name="DetailsModal" type="ColorRect" parent="Dashboard"]
+[node name="DetailsModal" type="ColorRect" parent="Dashboard" unique_id=2006263225]
 visible = false
 layout_mode = 0
 
-[node name="VBox" type="VBoxContainer" parent="Dashboard/DetailsModal"]
+[node name="VBox" type="VBoxContainer" parent="Dashboard/DetailsModal" unique_id=1349303344]
 layout_mode = 0
 
-[node name="NameLabel" type="Label" parent="Dashboard/DetailsModal/VBox"]
+[node name="NameLabel" type="Label" parent="Dashboard/DetailsModal/VBox" unique_id=1787096792]
 layout_mode = 2
 
-[node name="StatsLabel" type="Label" parent="Dashboard/DetailsModal/VBox"]
+[node name="StatsLabel" type="Label" parent="Dashboard/DetailsModal/VBox" unique_id=1312550615]
 layout_mode = 2
 
-[node name="Pedigree" type="GridContainer" parent="Dashboard/DetailsModal/VBox"]
+[node name="Pedigree" type="GridContainer" parent="Dashboard/DetailsModal/VBox" unique_id=1518541148]
 layout_mode = 2
 
-[node name="Sire" type="Label" parent="Dashboard/DetailsModal/VBox/Pedigree"]
+[node name="Sire" type="Label" parent="Dashboard/DetailsModal/VBox/Pedigree" unique_id=1501955475]
 layout_mode = 2
 
-[node name="Dam" type="Label" parent="Dashboard/DetailsModal/VBox/Pedigree"]
+[node name="Dam" type="Label" parent="Dashboard/DetailsModal/VBox/Pedigree" unique_id=1771556618]
 layout_mode = 2
 
-[node name="SireSire" type="Label" parent="Dashboard/DetailsModal/VBox/Pedigree"]
+[node name="SireSire" type="Label" parent="Dashboard/DetailsModal/VBox/Pedigree" unique_id=1676676615]
 layout_mode = 2
 
-[node name="SireDam" type="Label" parent="Dashboard/DetailsModal/VBox/Pedigree"]
+[node name="SireDam" type="Label" parent="Dashboard/DetailsModal/VBox/Pedigree" unique_id=259717006]
 layout_mode = 2
 
-[node name="DamSire" type="Label" parent="Dashboard/DetailsModal/VBox/Pedigree"]
+[node name="DamSire" type="Label" parent="Dashboard/DetailsModal/VBox/Pedigree" unique_id=1248979567]
 layout_mode = 2
 
-[node name="DamDam" type="Label" parent="Dashboard/DetailsModal/VBox/Pedigree"]
+[node name="DamDam" type="Label" parent="Dashboard/DetailsModal/VBox/Pedigree" unique_id=1569959781]
 layout_mode = 2
 
-[node name="DetailsActions" type="HBoxContainer" parent="Dashboard/DetailsModal/VBox"]
+[node name="DetailsActions" type="HBoxContainer" parent="Dashboard/DetailsModal/VBox" unique_id=1405595741]
 layout_mode = 2
 
-[node name="TreatBtn" type="Button" parent="Dashboard/DetailsModal/VBox/DetailsActions"]
+[node name="TreatBtn" type="Button" parent="Dashboard/DetailsModal/VBox/DetailsActions" unique_id=80490141]
 layout_mode = 2
 
-[node name="Pastures" type="SubViewportContainer" parent="."]
+[node name="Pastures" type="SubViewportContainer" parent="." unique_id=1593132215]
+visible = false
 layout_mode = 2
 stretch = true
+metadata/_tab_index = 1
 
-[node name="SubViewport" type="SubViewport" parent="Pastures"]
+[node name="SubViewport" type="SubViewport" parent="Pastures" unique_id=865065263]
 handle_input_locally = false
-size = Vector2i(540, 960)
-render_target_update_mode = 4
+size = Vector2i(2, 2)
+render_target_update_mode = 0
 
-[node name="Pasture3D" parent="Pastures/SubViewport" instance=ExtResource("5_pstr3")]
+[node name="Pasture3D" parent="Pastures/SubViewport" unique_id=1487587389 instance=ExtResource("5_pstr3")]
 
-[node name="Breeding" type="Control" parent="."]
+[node name="Breeding" type="Control" parent="." unique_id=796667959]
+visible = false
 layout_mode = 2
 script = ExtResource("2_brdng")
+metadata/_tab_index = 2
 
-[node name="BuckSelector" type="OptionButton" parent="Breeding"]
+[node name="BuckSelector" type="OptionButton" parent="Breeding" unique_id=2134882811]
 layout_mode = 0
 
-[node name="DoeSelector" type="OptionButton" parent="Breeding"]
+[node name="DoeSelector" type="OptionButton" parent="Breeding" unique_id=545026014]
 layout_mode = 0
 
-[node name="ComparisonStats" type="Label" parent="Breeding"]
-layout_mode = 2
+[node name="ComparisonStats" type="Label" parent="Breeding" unique_id=786039428]
+layout_mode = 0
 
-[node name="BreedButton" type="Button" parent="Breeding"]
-layout_mode = 2
+[node name="BreedButton" type="Button" parent="Breeding" unique_id=357295616]
+layout_mode = 0
 
-[node name="Market" type="Control" parent="."]
+[node name="Market" type="Control" parent="." unique_id=1974709652]
+visible = false
 layout_mode = 2
 script = ExtResource("3_mrkt")
+metadata/_tab_index = 3
 
-[node name="FeedStore" type="VBoxContainer" parent="Market"]
+[node name="FeedStore" type="VBoxContainer" parent="Market" unique_id=1553807530]
 layout_mode = 0
 
-[node name="Feed50Btn" type="Button" parent="Market/FeedStore"]
+[node name="Feed50Btn" type="Button" parent="Market/FeedStore" unique_id=1593152389]
 layout_mode = 2
 
-[node name="Feed200Btn" type="Button" parent="Market/FeedStore"]
+[node name="Feed200Btn" type="Button" parent="Market/FeedStore" unique_id=866066912]
 layout_mode = 2
 
-[node name="Livestock" type="VBoxContainer" parent="Market"]
+[node name="Livestock" type="VBoxContainer" parent="Market" unique_id=1973676299]
 layout_mode = 0
 
-[node name="BuyBuckBtn" type="Button" parent="Market/Livestock"]
+[node name="BuyBuckBtn" type="Button" parent="Market/Livestock" unique_id=2006132313]
 layout_mode = 2
 
-[node name="BuyDoeBtn" type="Button" parent="Market/Livestock"]
+[node name="BuyDoeBtn" type="Button" parent="Market/Livestock" unique_id=1694760517]
 layout_mode = 2
 
-[node name="Upgrades" type="VBoxContainer" parent="Market"]
+[node name="Upgrades" type="VBoxContainer" parent="Market" unique_id=1136271840]
 layout_mode = 0
 
-[node name="BarnUpgradeBtn" type="Button" parent="Market/Upgrades"]
+[node name="BarnUpgradeBtn" type="Button" parent="Market/Upgrades" unique_id=87097790]
 layout_mode = 2
 
-[node name="MedicalUpgradeBtn" type="Button" parent="Market/Upgrades"]
+[node name="MedicalUpgradeBtn" type="Button" parent="Market/Upgrades" unique_id=286508130]
 layout_mode = 2
 
-[node name="WatererUpgradeBtn" type="Button" parent="Market/Upgrades"]
+[node name="WatererUpgradeBtn" type="Button" parent="Market/Upgrades" unique_id=882537314]
 layout_mode = 2
 
-[node name="QuarantineUpgradeBtn" type="Button" parent="Market/Upgrades"]
+[node name="QuarantineUpgradeBtn" type="Button" parent="Market/Upgrades" unique_id=1969296708]
 layout_mode = 2

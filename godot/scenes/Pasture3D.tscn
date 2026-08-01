@@ -1,45 +1,46 @@
-[gd_scene load_steps=4 format=3 uid="uid://cfy5b8w3e0g2k"]
+[gd_scene format=3 uid="uid://cfy5b8w3e0g2k"]
 
-[ext_resource type="Script" path="res://scripts/Pasture3D.gd" id="1_a2b3c"]
-[ext_resource type="PackedScene" path="res://scenes/Goat3D.tscn" id="2_g3d2b"]
-[ext_resource type="PackedScene" path="res://scenes/Donkey3D.tscn" id="3_d3d2c"]
+[ext_resource type="Script" uid="uid://c7rbhi5i6uf5n" path="res://scripts/Pasture3D.gd" id="1_a2b3c"]
+[ext_resource type="PackedScene" uid="uid://df5w3e2r8k3p" path="res://scenes/Goat3D.tscn" id="2_g3d2b"]
+[ext_resource type="PackedScene" uid="uid://df5w3e2r8k3q" path="res://scenes/Donkey3D.tscn" id="3_d3d2c"]
 
-[node name="Pasture3D" type="Node3D"]
+[node name="Pasture3D" type="Node3D" unique_id=1077934857]
 script = ExtResource("1_a2b3c")
 goat_scene = ExtResource("2_g3d2b")
 donkey_scene = ExtResource("3_d3d2c")
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=120881598]
 transform = Transform3D(0.707107, -0.353553, 0.612372, 0, 0.866025, 0.5, -0.707107, -0.353553, 0.612372, 45, 35, 45)
 projection = 1
 size = 75.0
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1421197888]
 transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 20, 0)
 shadow_enabled = true
 
-[node name="GroundP1" type="MeshInstance3D" parent="."]
+[node name="GroundP1" type="MeshInstance3D" parent="." unique_id=1056439623]
 
-[node name="GroundP2" type="MeshInstance3D" parent="."]
+[node name="GroundP2" type="MeshInstance3D" parent="." unique_id=1361549009]
+layers = 1023
 
-[node name="BarnLvl1" type="Node3D" parent="."]
+[node name="BarnLvl1" type="Node3D" parent="." unique_id=485704972]
 
-[node name="BarnLvl2" type="Node3D" parent="."]
+[node name="BarnLvl2" type="Node3D" parent="." unique_id=1628636764]
 
-[node name="BarnLvl3" type="Node3D" parent="."]
+[node name="BarnLvl3" type="Node3D" parent="." unique_id=1440183950]
 
-[node name="BarnLvl4" type="Node3D" parent="."]
+[node name="BarnLvl4" type="Node3D" parent="." unique_id=1949099529]
 
-[node name="BarnLvl5" type="Node3D" parent="."]
+[node name="BarnLvl5" type="Node3D" parent="." unique_id=1107567424]
 
-[node name="MedicalStation" type="Node3D" parent="."]
+[node name="MedicalStation" type="Node3D" parent="." unique_id=1030728913]
 
-[node name="AutomatedWatererP1" type="Node3D" parent="."]
+[node name="AutomatedWatererP1" type="Node3D" parent="." unique_id=991145914]
 
-[node name="AutomatedWatererP2" type="Node3D" parent="."]
+[node name="AutomatedWatererP2" type="Node3D" parent="." unique_id=1692413899]
 
-[node name="QuarantinePen" type="Node3D" parent="."]
+[node name="QuarantinePen" type="Node3D" parent="." unique_id=164932363]
 
-[node name="DonkeyContainer" type="Node3D" parent="."]
+[node name="DonkeyContainer" type="Node3D" parent="." unique_id=1677400403]
 
-[node name="GoatContainer" type="Node3D" parent="."]
+[node name="GoatContainer" type="Node3D" parent="." unique_id=288888387]

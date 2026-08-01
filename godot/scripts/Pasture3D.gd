@@ -89,8 +89,8 @@ func _sync_goats():
 		if not spawned_goats.has(g.id):
 			# Spawn new 3D goat model
 			var new_goat_node = goat_scene.instantiate()
-			new_goat_node.setup(g)
 			goat_container.add_child(new_goat_node)
+			new_goat_node.setup(g)
 			spawned_goats[g.id] = new_goat_node
 		else:
 			# Update data reference
