@@ -117,6 +117,15 @@ class GameStateNotifier extends StateNotifier<GameState> {
       grassGrown2 = 2.0;
     } // Drought is 0.0
 
+    // Automated Waterer: Speeds up grass regrowth in the inactive pasture by 15%
+    if (state.ranch.hasAutomatedWaterers) {
+      if (state.ranch.currentPasture == 1) {
+        grassGrown2 *= 1.15;
+      } else {
+        grassGrown1 *= 1.15;
+      }
+    }
+
     double grass1 = state.ranch.grassLevel1;
     double grass2 = state.ranch.grassLevel2;
 
@@ -149,11 +158,34 @@ class GameStateNotifier extends StateNotifier<GameState> {
       }
     }
 
-    // 4. Update Goats (Age, Weight, Sickness, Pregnancy)
+    // 4. Parasite transmission setup
+    bool parasiteSpreadEvent = false;
+    if (!state.ranch.hasQuarantinePen && state.herd.any((g) => g.isSick)) {
+      if (_random.nextDouble() < 0.10) {
+        parasiteSpreadEvent = true;
+      }
+    }
+
+    int infectTargetIndex = -1;
+    if (parasiteSpreadEvent) {
+      final healthyIndices = [];
+      for (int i = 0; i < state.herd.length; i++) {
+        if (!state.herd[i].isSick) {
+          healthyIndices.add(i);
+        }
+      }
+      if (healthyIndices.isNotEmpty) {
+        infectTargetIndex = healthyIndices[_random.nextInt(healthyIndices.length)];
+      }
+    }
+
+    // 5. Update Goats (Age, Weight, Sickness, Pregnancy)
     final List<Goat> updatedHerd = [];
     final List<Goat> newbornKids = [];
 
-    for (var goat in state.herd) {
+    for (int idx = 0; idx < state.herd.length; idx++) {
+      final goat = state.herd[idx];
+      
       // Monthly age tick (once every 30 days)
       int newAgeMonths = goat.ageMonths;
       if (nextDay % 30 == 0) {
@@ -176,17 +208,29 @@ class GameStateNotifier extends StateNotifier<GameState> {
 
       // Sickness check
       bool nowSick = goat.isSick;
-      if (isStarving) {
+      if (idx == infectTargetIndex) {
+        nowSick = true;
+        currentLedger.insert(0, 'Day $nextDay: ⚠️ Parasites spread! ${goat.name} caught worms from another sick herd member.');
+      } else if (isStarving) {
         nowSick = true;
       } else if (!goat.isSick && _random.nextDouble() < (0.05 * (1.0 - goat.parasiteResistance))) {
         nowSick = true;
         currentLedger.insert(0, 'Day $nextDay: 🤒 ${goat.name} has contracted worms/parasites.');
       }
 
+      // Medical Station auto-cure
+      if (nowSick && state.ranch.hasMedicalStation && _random.nextDouble() < 0.15) {
+        nowSick = false;
+        currentLedger.insert(0, 'Day $nextDay: 💊 Medical Station care cured ${goat.name} of their parasites.');
+      }
+
       // Sick goats have a chance of death unless treated
-      if (nowSick && _random.nextDouble() < 0.07) {
-        currentLedger.insert(0, 'Day $nextDay: 💀 RIP ${goat.name} passed away due to untreated illness.');
-        continue; // Skip adding back to the herd list (death)
+      if (nowSick) {
+        final deathChance = state.ranch.hasMedicalStation ? 0.035 : 0.07;
+        if (_random.nextDouble() < deathChance) {
+          currentLedger.insert(0, 'Day $nextDay: 💀 RIP ${goat.name} passed away due to untreated illness.');
+          continue; // Skip adding back to the herd list (death)
+        }
       }
 
       // Pregnancy updates
@@ -227,7 +271,12 @@ class GameStateNotifier extends StateNotifier<GameState> {
     // Add newborns to the herd
     updatedHerd.addAll(newbornKids);
 
-    // 5. Random Events
+    // Enforce Barn limit check (warn player but let birth happen)
+    if (updatedHerd.length > state.ranch.herdCapacity) {
+      currentLedger.insert(0, 'Day $nextDay: ⚠️ OVER CAPACITY! Your herd of ${updatedHerd.length} goats exceeds your Barn limit of ${state.ranch.herdCapacity}. Upgrade your Barn or sell goats to avoid penalties!');
+    }
+
+    // 6. Random Events
     // Coyote/Predator attack (2% chance)
     if (_random.nextDouble() < 0.02) {
       if (state.hasGuardDonkey) {
@@ -295,8 +344,41 @@ class GameStateNotifier extends StateNotifier<GameState> {
     );
   }
 
+  void buyUpgrade(String upgradeId, double cost) {
+    if (state.ranch.cash < cost) return;
+    
+    RanchState updatedRanch = state.ranch.copyWith(
+      cash: state.ranch.cash - cost,
+    );
+
+    final List<String> currentLedger = List.from(state.ranch.ledger);
+
+    switch (upgradeId) {
+      case 'barn':
+        updatedRanch = updatedRanch.copyWith(barnLevel: state.ranch.barnLevel + 1);
+        currentLedger.insert(0, 'Day ${state.ranch.dayCount}: Upgraded Barn to Level ${updatedRanch.barnLevel} (Capacity: ${updatedRanch.herdCapacity} goats) for \$${cost.toStringAsFixed(0)}.');
+        break;
+      case 'medical':
+        updatedRanch = updatedRanch.copyWith(hasMedicalStation: true);
+        currentLedger.insert(0, 'Day ${state.ranch.dayCount}: Constructed a Medical Station for \$${cost.toStringAsFixed(0)}.');
+        break;
+      case 'waterer':
+        updatedRanch = updatedRanch.copyWith(hasAutomatedWaterers: true);
+        currentLedger.insert(0, 'Day ${state.ranch.dayCount}: Installed Automated Waterers in pastures for \$${cost.toStringAsFixed(0)}.');
+        break;
+      case 'quarantine':
+        updatedRanch = updatedRanch.copyWith(hasQuarantinePen: true);
+        currentLedger.insert(0, 'Day ${state.ranch.dayCount}: Built a Quarantine Pen to prevent parasite spread for \$${cost.toStringAsFixed(0)}.');
+        break;
+    }
+
+    state = state.copyWith(
+      ranch: updatedRanch.copyWith(ledger: currentLedger),
+    );
+  }
+
   void treatGoat(String id) {
-    const cost = 25.0;
+    final cost = state.ranch.hasMedicalStation ? 10.0 : 25.0;
     if (state.ranch.cash < cost) return;
 
     final goatIndex = state.herd.indexWhere((g) => g.id == id);
@@ -307,7 +389,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
     updatedHerd[goatIndex] = sickGoat.copyWith(isSick: false);
 
     final List<String> currentLedger = List.from(state.ranch.ledger);
-    currentLedger.insert(0, 'Day ${state.ranch.dayCount}: Treated ${sickGoat.name} with dewormer for \$25. Sick status cleared.');
+    currentLedger.insert(0, 'Day ${state.ranch.dayCount}: Treated ${sickGoat.name} with dewormer for \$${cost.toStringAsFixed(0)}. Sick status cleared.');
 
     state = state.copyWith(
       herd: updatedHerd,
@@ -318,26 +400,20 @@ class GameStateNotifier extends StateNotifier<GameState> {
     );
   }
 
-  void sellGoat(String id) {
+  void sellGoat(String id, double finalBid) {
     final goatIndex = state.herd.indexWhere((g) => g.id == id);
     if (goatIndex == -1) return;
 
     final soldGoat = state.herd[goatIndex];
     final List<Goat> updatedHerd = List.from(state.herd)..removeAt(goatIndex);
 
-    // Calculate value based on traits and weight
-    double price = soldGoat.weightLbs * 1.5; // $1.50 per lb base
-    price += soldGoat.parasiteResistance * 150; // Premium genetics bonus
-    price += soldGoat.growthRate * 100;
-    if (soldGoat.isSick) price *= 0.4; // Heavy sick discount
-
     final List<String> currentLedger = List.from(state.ranch.ledger);
-    currentLedger.insert(0, 'Day ${state.ranch.dayCount}: Sold ${soldGoat.name} at auction for \$${price.toStringAsFixed(2)}.');
+    currentLedger.insert(0, 'Day ${state.ranch.dayCount}: Sold ${soldGoat.name} at auction for \$${finalBid.toStringAsFixed(2)}.');
 
     state = state.copyWith(
       herd: updatedHerd,
       ranch: state.ranch.copyWith(
-        cash: state.ranch.cash + price,
+        cash: state.ranch.cash + finalBid,
         ledger: currentLedger,
       ),
     );
@@ -345,6 +421,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
 
   void buyGoat(Goat newGoat, double cost) {
     if (state.ranch.cash < cost) return;
+    if (state.herd.length >= state.ranch.herdCapacity) return;
 
     final List<Goat> updatedHerd = List.from(state.herd)..add(newGoat);
     final List<String> currentLedger = List.from(state.ranch.ledger);
@@ -360,6 +437,8 @@ class GameStateNotifier extends StateNotifier<GameState> {
   }
 
   void breedGoats(String sireId, String damId) {
+    if (state.herd.length >= state.ranch.herdCapacity) return;
+
     final sire = state.herd.firstWhere((g) => g.id == sireId);
     final dam = state.herd.firstWhere((g) => g.id == damId);
 

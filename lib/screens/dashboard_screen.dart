@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/game_provider.dart';
+import '../models/goat_model.dart';
+import 'auction_dialog.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -203,9 +205,13 @@ class DashboardScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
 
+              // Ranch Upgrades Status Panel
+              _buildUpgradesPanel(context, gameState),
+              const SizedBox(height: 16),
+
               // 4. Herd List
               Text(
-                'Active Herd (${herd.length} Goats)',
+                'Active Herd (${herd.length} / ${ranch.herdCapacity} Goats - Barn Lvl ${ranch.barnLevel})',
                 style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -223,9 +229,12 @@ class DashboardScreen extends ConsumerWidget {
                   itemCount: herd.length,
                   itemBuilder: (context, index) {
                     final goat = herd[index];
+                    final treatCost = ranch.hasMedicalStation ? 10.0 : 25.0;
+
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 6),
                       child: ListTile(
+                        onTap: () => _showGoatDetailModal(context, goat, ref),
                         leading: CircleAvatar(
                           backgroundColor: goat.gender == 'buck' ? Colors.blue.shade100 : Colors.pink.shade100,
                           child: Text(
@@ -245,14 +254,19 @@ class DashboardScreen extends ConsumerWidget {
                           children: [
                             if (goat.isSick)
                               TextButton(
-                                onPressed: ranch.cash >= 25
+                                onPressed: ranch.cash >= treatCost
                                     ? () => ref.read(gameStateProvider.notifier).treatGoat(goat.id)
                                     : null,
-                                child: const Text('Treat (\$25)', style: TextStyle(color: Colors.red)),
+                                child: Text('Treat (\$${treatCost.toStringAsFixed(0)})', style: const TextStyle(color: Colors.red)),
                               )
                             else
                               TextButton(
-                                onPressed: () => ref.read(gameStateProvider.notifier).sellGoat(goat.id),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (ctx) => AuctionDialog(goat: goat),
+                                  );
+                                },
                                 child: const Text('Sell at Auction', style: TextStyle(color: Colors.green)),
                               ),
                           ],
@@ -349,6 +363,227 @@ class DashboardScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text('${level.toStringAsFixed(0)}% Grass', style: theme.textTheme.bodySmall),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUpgradesPanel(BuildContext context, GameState gameState) {
+    final theme = Theme.of(context);
+    final ranch = gameState.ranch;
+    
+    final activeUpgrades = <Widget>[];
+
+    if (gameState.hasGuardDonkey) {
+      activeUpgrades.add(_buildUpgradeChip(context, Icons.security, "Guard Donkey 🫏", Colors.amber));
+    }
+    if (ranch.hasMedicalStation) {
+      activeUpgrades.add(_buildUpgradeChip(context, Icons.local_hospital_outlined, "Medical Station 💊", Colors.redAccent));
+    }
+    if (ranch.hasAutomatedWaterers) {
+      activeUpgrades.add(_buildUpgradeChip(context, Icons.water_drop_outlined, "Auto Waterers 💧", Colors.blueAccent));
+    }
+    if (ranch.hasQuarantinePen) {
+      activeUpgrades.add(_buildUpgradeChip(context, Icons.gavel_outlined, "Quarantine Pen 🚧", Colors.orangeAccent));
+    }
+
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Ranch Upgrades & Facilities',
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            if (activeUpgrades.isEmpty)
+              Text(
+                'No upgrades purchased yet. Visit the Ranch Construction tab in the Market to upgrade!',
+                style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+              )
+            else
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: activeUpgrades,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUpgradeChip(BuildContext context, IconData icon, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showGoatDetailModal(BuildContext context, Goat goat, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final cash = ref.read(gameStateProvider).ranch.cash;
+    final treatCost = ref.read(gameStateProvider).ranch.hasMedicalStation ? 10.0 : 25.0;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          "${goat.name} Details",
+          style: const TextStyle(fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Genetic stats card
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    children: [
+                      _buildDetailRow("Breed", goat.breed),
+                      _buildDetailRow("Gender", goat.genderDisplay),
+                      _buildDetailRow("Age", "${goat.ageMonths} months"),
+                      _buildDetailRow("Weight", "${goat.weightLbs.toStringAsFixed(1)} lbs"),
+                      _buildDetailRow("Parasite Resistance", "${(goat.parasiteResistance * 100).toStringAsFixed(0)}%"),
+                      _buildDetailRow("Growth Rate", "${goat.growthRate.toStringAsFixed(2)}x"),
+                      _buildDetailRow("Status", goat.statusDisplay),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              // Pedigree Visual Tree
+              Text(
+                "Pedigree (3 Generations)",
+                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Target Goat
+                  Expanded(
+                    child: _buildPedigreeNode(context, goat.name, "${goat.breed} (${goat.genderDisplay.substring(0,1)})", isTarget: true),
+                  ),
+                  const Icon(Icons.chevron_right, size: 16, color: Colors.grey),
+                  // Parents
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildPedigreeNode(context, goat.sireName, "Sire (PR: ${(goat.sirePR * 100).toStringAsFixed(0)}%)"),
+                        const SizedBox(height: 8),
+                        _buildPedigreeNode(context, goat.damName, "Dam (PR: ${(goat.damPR * 100).toStringAsFixed(0)}%)"),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, size: 16, color: Colors.grey),
+                  // Grandparents
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildPedigreeNode(context, goat.sireSireName, "G-Sire (Sire)"),
+                        const SizedBox(height: 2),
+                        _buildPedigreeNode(context, goat.sireDamName, "G-Dam (Sire)"),
+                        const SizedBox(height: 8),
+                        _buildPedigreeNode(context, goat.damSireName, "G-Sire (Dam)"),
+                        const SizedBox(height: 2),
+                        _buildPedigreeNode(context, goat.damDamName, "G-Dam (Dam)"),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          if (goat.isSick)
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+              onPressed: cash >= treatCost
+                  ? () {
+                      ref.read(gameStateProvider.notifier).treatGoat(goat.id);
+                      Navigator.pop(ctx);
+                    }
+                  : null,
+              child: Text("Treat (\$${treatCost.toStringAsFixed(0)})"),
+            ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Close"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPedigreeNode(BuildContext context, String name, String label, {bool isTarget = false}) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+      decoration: BoxDecoration(
+        color: isTarget ? theme.colorScheme.primaryContainer : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: isTarget ? theme.colorScheme.primary : theme.dividerColor),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            name,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 10,
+              color: isTarget ? theme.colorScheme.onPrimaryContainer : Colors.white,
+            ),
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+          Text(
+            label,
+            style: TextStyle(fontSize: 8, color: isTarget ? theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.8) : Colors.grey),
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );

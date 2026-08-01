@@ -14,6 +14,12 @@ class Goat {
   final int pregnancyDays;
   final String sireName;
   final String damName;
+  final String sireSireName;
+  final String sireDamName;
+  final String damSireName;
+  final String damDamName;
+  final double sirePR;
+  final double damPR;
 
   Goat({
     required this.id,
@@ -29,9 +35,16 @@ class Goat {
     this.pregnancyDays = 0,
     required this.sireName,
     required this.damName,
+    this.sireSireName = 'Unknown',
+    this.sireDamName = 'Unknown',
+    this.damSireName = 'Unknown',
+    this.damDamName = 'Unknown',
+    this.sirePR = 0.5,
+    this.damPR = 0.5,
   });
 
   String get genderDisplay => gender == 'buck' ? 'Buck' : 'Doe';
+  bool get isAdult => ageMonths >= 12;
   
   String get statusDisplay {
     if (isSick) return 'Sick 🤒';
@@ -53,6 +66,12 @@ class Goat {
     int? pregnancyDays,
     String? sireName,
     String? damName,
+    String? sireSireName,
+    String? sireDamName,
+    String? damSireName,
+    String? damDamName,
+    double? sirePR,
+    double? damPR,
   }) {
     return Goat(
       id: id ?? this.id,
@@ -68,6 +87,12 @@ class Goat {
       pregnancyDays: pregnancyDays ?? this.pregnancyDays,
       sireName: sireName ?? this.sireName,
       damName: damName ?? this.damName,
+      sireSireName: sireSireName ?? this.sireSireName,
+      sireDamName: sireDamName ?? this.sireDamName,
+      damSireName: damSireName ?? this.damSireName,
+      damDamName: damDamName ?? this.damDamName,
+      sirePR: sirePR ?? this.sirePR,
+      damPR: damPR ?? this.damPR,
     );
   }
 
@@ -104,6 +129,12 @@ class Goat {
       growthRate: growthRate,
       sireName: sire.name,
       damName: dam.name,
+      sireSireName: sire.sireName,
+      sireDamName: sire.damName,
+      damSireName: dam.sireName,
+      damDamName: dam.damName,
+      sirePR: sire.parasiteResistance,
+      damPR: dam.parasiteResistance,
     );
   }
 }

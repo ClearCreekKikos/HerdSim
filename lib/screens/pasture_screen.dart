@@ -212,6 +212,34 @@ class _PastureScreenState extends ConsumerState<PastureScreen> with SingleTicker
                             ],
                           ),
                         ),
+
+                      // Draw Automated Waterer Visual Feedback
+                      if (ranch.hasAutomatedWaterers)
+                        Positioned(
+                          right: 12,
+                          top: 12,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.blueAccent.withValues(alpha: 0.85),
+                              borderRadius: BorderRadius.circular(4),
+                              boxShadow: const [
+                                BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))
+                              ],
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.water_drop, color: Colors.white, size: 10),
+                                SizedBox(width: 3),
+                                Text(
+                                  'Irrigation Active 💧',
+                                  style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
