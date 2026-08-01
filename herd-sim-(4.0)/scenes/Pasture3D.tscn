@@ -1,0 +1,36 @@
+[gd_scene load_steps=4 format=3 uid="uid://cfy5b8w3e0g2k"]
+
+[ext_resource type="Script" path="res://scripts/Pasture3D.gd" id="1_a2b3c"]
+[ext_resource type="PackedScene" path="res://scenes/Goat3D.tscn" id="2_g3d2b"]
+[ext_resource type="PackedScene" path="res://scenes/Donkey3D.tscn" id="3_d3d2c"]
+
+[node name="Pasture3D" type="Node3D"]
+script = ExtResource("1_a2b3c")
+goat_scene = ExtResource("2_g3d2b")
+donkey_scene = ExtResource("3_d3d2c")
+
+[node name="GroundP1" type="MeshInstance3D" parent="."]
+
+[node name="GroundP2" type="MeshInstance3D" parent="."]
+
+[node name="BarnLvl1" type="Node3D" parent="."]
+
+[node name="BarnLvl2" type="Node3D" parent="."]
+
+[node name="BarnLvl3" type="Node3D" parent="."]
+
+[node name="BarnLvl4" type="Node3D" parent="."]
+
+[node name="BarnLvl5" type="Node3D" parent="."]
+
+[node name="MedicalStation" type="Node3D" parent="."]
+
+[node name="AutomatedWatererP1" type="Node3D" parent="."]
+
+[node name="AutomatedWatererP2" type="Node3D" parent="."]
+
+[node name="QuarantinePen" type="Node3D" parent="."]
+
+[node name="DonkeyContainer" type="Node3D" parent="."]
+
+[node name="GoatContainer" type="Node3D" parent="."]

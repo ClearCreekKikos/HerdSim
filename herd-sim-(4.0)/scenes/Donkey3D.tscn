@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://df5w3e2r8k3q"]
+
+[ext_resource type="Script" path="res://scripts/Donkey3D.gd" id="1_d3d2a"]
+
+[node name="Donkey3D" type="Node3D"]
+script = ExtResource("1_d3d2a")
+
+[node name="Sprite3D" type="Label3D" parent="."]
+pixel_size = 0.05
+billboard = 1
+double_sided = false
+text = "🫏"
+font_size = 68
