@@ -1,0 +1,42 @@
+[gd_scene load_steps=2 format=3 uid="uid://df5w3e2r8k3r"]
+
+[ext_resource type="Script" path="res://scripts/AuctionDialog.gd" id="1_actnd"]
+
+[node name="AuctionDialog" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_actnd")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 0
+
+[node name="InfoLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="BidDisplay" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="AmountLabel" type="Label" parent="VBoxContainer/BidDisplay"]
+layout_mode = 2
+
+[node name="BidderLabel" type="Label" parent="VBoxContainer/BidDisplay"]
+layout_mode = 2
+
+[node name="LogText" type="TextEdit" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ActionButtons" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="AcceptButton" type="Button" parent="VBoxContainer/ActionButtons"]
+layout_mode = 2
+
+[node name="RejectButton" type="Button" parent="VBoxContainer/ActionButtons"]
+layout_mode = 2
+
+[node name="BiddingTimer" type="Timer" parent="."]
