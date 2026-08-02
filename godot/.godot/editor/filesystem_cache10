@@ -1,5 +1,5 @@
 9cad1ddce9e5a63143ba340c9520626b
-::res://::1785548297
+::res://::1785548557
 ::res://scenes/::1785548067
 AuctionDialog.tscn::PackedScene::222750695017103081::1785546259::0::1::::<><><>0<>0<><>::res://scripts/AuctionDialog.gd
 Donkey3D.tscn::PackedScene::222750695017103080::1785546243::0::1::::<><><>0<>0<><>::res://scripts/Donkey3D.gd
@@ -7,12 +7,12 @@ Goat3D.tscn::PackedScene::222750695017103079::1785546239::0::1::::<><><>0<>0<><>
 MainUI.tscn::PackedScene::127667937004476871::1785547941::0::1::::<><><>0<>0<><>::uid://cykf0b2s6nx5b::::res://scripts/DashboardUI.gd<>uid://bsrsf7188s3ky::::res://scripts/BreedingUI.gd<>uid://cia3fyadkbxo1::::res://scripts/MarketUI.gd<>uid://df5w3e2r8k3r::::res://scenes/AuctionDialog.tscn<>uid://cfy5b8w3e0g2k::::res://scenes/Pasture3D.tscn
 Pasture3D.tscn::PackedScene::5175155715785477056::1785548067::0::1::::<><><>0<>0<><>::uid://c7rbhi5i6uf5n::::res://scripts/Pasture3D.gd<>uid://df5w3e2r8k3p::::res://scenes/Goat3D.tscn<>uid://df5w3e2r8k3q::::res://scenes/Donkey3D.tscn
 ::res://scripts/::1785547096
-AuctionDialog.gd::GDScript::6344677858491252984::1785546214::0::1::::<>Control<><>0<>0<><>::
-BreedingUI.gd::GDScript::3686017848292348700::1785546227::0::1::::<>Control<><>0<>0<><>::
+AuctionDialog.gd::GDScript::6344677858491252984::1785548392::0::1::::<>Control<><>0<>0<><>::
+BreedingUI.gd::GDScript::3686017848292348700::1785548369::0::1::::<>Control<><>0<>0<><>::
 DashboardUI.gd::GDScript::6478365717143903793::1785547680::0::1::::<>Control<><>0<>0<><>::
 Donkey3D.gd::GDScript::3627777898929319939::1785546196::0::1::::<>Node3D<><>0<>0<><>::
-GameManager.gd::GDScript::6338977194605797581::1785546099::0::1::::<>Node<><>0<>0<><>::
+GameManager.gd::GDScript::6338977194605797581::1785548359::0::1::::<>Node<><>0<>0<><>::
 Goat3D.gd::GDScript::5885450517607960779::1785546203::0::1::::<>Node3D<><>0<>0<><>::
-Goat.gd::GDScript::8094399284344984263::1785546090::0::1::::Goat<>RefCounted<><>0<>0<><>::
+Goat.gd::GDScript::8094399284344984263::1785548340::0::1::::Goat<>RefCounted<><>0<>0<><>::
 MarketUI.gd::GDScript::5336062381967586138::1785546232::0::1::::<>Control<><>0<>0<><>::
 Pasture3D.gd::GDScript::7054052470108991661::1785548118::0::1::::<>Node3D<><>0<>0<><>::
